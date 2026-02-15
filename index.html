@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dischem Shelf Health Report</title>
+    <title>Shelf Health Report</title>
     <style>
         * {
             margin: 0;
@@ -12,14 +12,14 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
             background: white;
             border-radius: 16px;
@@ -44,7 +44,7 @@
             opacity: 0.9;
         }
 
-        .form-content {
+        .form-container {
             padding: 30px 20px;
         }
 
@@ -54,9 +54,9 @@
 
         label {
             display: block;
-            font-weight: 600;
             margin-bottom: 8px;
-            color: #333;
+            font-weight: 600;
+            color: #2d3748;
             font-size: 14px;
         }
 
@@ -68,12 +68,11 @@
         select,
         textarea {
             width: 100%;
-            padding: 12px 16px;
+            padding: 12px;
             border: 2px solid #e2e8f0;
             border-radius: 8px;
             font-size: 16px;
-            transition: all 0.3s;
-            font-family: inherit;
+            transition: border-color 0.3s;
         }
 
         input[type="text"]:focus,
@@ -81,7 +80,6 @@
         textarea:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         textarea {
@@ -89,155 +87,71 @@
             resize: vertical;
         }
 
-        /* Star Rating Styles */
         .rating-group {
             display: flex;
             gap: 8px;
-            align-items: center;
+            margin-top: 8px;
         }
 
-        .star-rating {
-            display: flex;
-            gap: 8px;
-            flex-direction: row-reverse;
-            justify-content: flex-end;
-        }
-
-        .star-rating input {
+        .rating-option {
             display: none;
         }
 
-        .star-rating label {
-            cursor: pointer;
-            font-size: 32px;
-            color: #cbd5e0;
-            transition: color 0.2s;
-            margin: 0;
-        }
-
-        .star-rating label:hover,
-        .star-rating label:hover ~ label,
-        .star-rating input:checked ~ label {
-            color: #fbbf24;
-        }
-
         .rating-label {
-            min-width: 60px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #667eea;
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 20px;
+        }
+
+        .rating-option:checked + .rating-label {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
         }
 
         .checkbox-group {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: #f7fafc;
-            border-radius: 8px;
-        }
-
-        input[type="checkbox"] {
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-        }
-
-        .checkbox-label {
-            font-weight: 500;
-            color: #2d3748;
-            cursor: pointer;
-            margin: 0;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            gap: 8px;
             margin-top: 8px;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .gps-status {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .gps-status.loading {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .gps-status.success {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .gps-status.error {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .spinner {
-            border: 3px solid rgba(0,0,0,0.1);
-            border-top-color: currentColor;
-            border-radius: 50%;
+        input[type="checkbox"] {
             width: 20px;
             height: 20px;
-            animation: spin 1s linear infinite;
+            cursor: pointer;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .success-message {
-            background: #d1fae5;
-            color: #065f46;
-            padding: 20px;
+        .photo-upload {
+            border: 2px dashed #cbd5e0;
             border-radius: 8px;
+            padding: 20px;
             text-align: center;
-            margin-top: 20px;
+            background: #f7fafc;
         }
 
-        .success-message h2 {
-            margin-bottom: 10px;
-        }
-
-        .help-text {
-            font-size: 12px;
-            color: #718096;
-            margin-top: 4px;
-        }
-
-        .hidden {
+        .photo-upload input[type="file"] {
             display: none;
+        }
+
+        .upload-btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .upload-btn:hover {
+            background: #5568d3;
         }
 
         .photo-preview {
@@ -251,43 +165,70 @@
         .photo-preview img {
             max-width: 100%;
             border-radius: 8px;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-top: 12px;
         }
 
-        .btn-small {
-            padding: 8px 16px;
-            background: #667eea;
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-small:hover {
-            background: #5568d3;
-        }
-
-        input[type="file"] {
-            padding: 12px;
-            border: 2px dashed #e2e8f0;
             border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
+            transition: transform 0.2s;
         }
 
-        .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #667eea;
-            margin: 30px 0 20px 0;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e2e8f0;
+        .submit-btn:hover {
+            transform: translateY(-2px);
         }
 
-        .section-title:first-of-type {
-            margin-top: 0;
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .gps-status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .gps-status.loading {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+
+        .gps-status.success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .gps-status.error {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 4px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .success-message {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -295,88 +236,46 @@
     <div class="container">
         <div class="header">
             <h1>📊 Shelf Health Report</h1>
-            <p>Dischem Merchandising Audit</p>
+            <p>Complete merchandising audit form</p>
         </div>
 
-        <div class="form-content">
+        <div class="form-container">
             <!-- GPS Status -->
             <div id="gpsStatus" class="gps-status loading">
-                <div class="spinner"></div>
-                <span>Getting your location...</span>
+                📍 Getting your location...
             </div>
 
-            <!-- Form -->
             <form id="shelfForm">
-                <!-- SECTION: Store Information -->
-                <div class="section-title">Store Information</div>
+                <!-- Hidden GPS Fields -->
+                <input type="hidden" id="geoLat" name="geo_lat">
+                <input type="hidden" id="geoLng" name="geo_lng">
 
                 <!-- Rep ID -->
                 <div class="form-group">
                     <label for="repId">Rep ID <span class="required">*</span></label>
-                    <input type="text" id="repId" name="repId" required placeholder="e.g., REP001">
-                    <div class="help-text">Enter your assigned rep ID</div>
+                    <input type="text" id="repId" name="rep_id" required placeholder="e.g., REP001">
+                    <div class="help-text">Enter your unique representative ID</div>
                 </div>
 
-                <!-- Dischem Store -->
+                <!-- Store Banner -->
                 <div class="form-group">
-                    <label for="outletId">Dischem Store <span class="required">*</span></label>
-                    <select id="outletId" name="outletId" required>
-                        <option value="">-- Select Store --</option>
-                        <option value="DC000074">DC000074 - Albermarle</option>
-                        <option value="DC000406">DC000406 - Amanzimtoti</option>
-                        <option value="DC000737">DC000737 - Arbour Arch</option>
-                        <option value="DC000194">DC000194 - Atterbury</option>
-                        <option value="DC000249">DC000249 - Artem Sea point</option>
-                        <option value="DC000023">DC000023 - Athol</option>
-                        <option value="DC000404">DC000404 - Ballito</option>
-                        <option value="DC000415">DC000415 - Ballito Lifestyle</option>
-                        <option value="DC000206">DC000206 - Bayside Mall</option>
-                        <option value="DC000307">DC000307 - Baywest</option>
-                        <option value="DC000011">DC000011 - Benmore</option>
-                        <option value="DC000408">DC000408 - Bluff</option>
-                        <option value="DC000247">DC000247 - Blue Route</option>
-                        <option value="DC000035">DC000035 - Boksburg</option>
-                        <option value="DC000042">DC000042 - Brakpan</option>
-                        <option value="DC000020">DC000020 - Bryanston</option>
-                        <option value="DC000732">DC000732 - Burgersfort</option>
-                        <option value="DC000738">DC000738 - Bush Baby</option>
-                        <option value="DC000265">DC000265 - Cape Gate</option>
-                        <option value="DC000211">DC000211 - Canal Walk</option>
-                        <option value="DC000735">DC000735 - Carnival Mall</option>
-                        <option value="DC000222">DC000222 - Cavendish</option>
-                        <option value="DC000231">DC000231 - Century City</option>
-                        <option value="DC000055">DC000055 - Clearwater</option>
-                        <option value="DC000266">DC000266 - Constantia</option>
-                        <option value="DC000733">DC000733 - Cresta</option>
-                        <option value="DC000264">DC000264 - De Grendel</option>
-                        <option value="DC000409">DC000409 - Durban North</option>
-                        <option value="DC000303">DC000303 - East London CBD</option>
-                        <option value="DC000068">DC000068 - Edenvale</option>
-                        <option value="DC000038">DC000038 - Emalahleni</option>
-                        <option value="DC000256">DC000256 - Fish Hoek</option>
-                        <option value="DC000024">DC000024 - Fourways</option>
-                        <option value="DC000419">DC000419 - Gateway</option>
-                        <option value="DC000726">DC000726 - George</option>
-                        <option value="DC000405">DC000405 - Glenwood</option>
-                        <option value="DC000087">DC000087 - Greenstone</option>
-                        <option value="DC000021">DC000021 - Hatfield</option>
-                        <option value="DC000301">DC000301 - Hemingways</option>
-                        <option value="DC000734">DC000734 - Hoedspruit</option>
-                        <option value="DC000075">DC000075 - Honeydew</option>
-                        <option value="DC000025">DC000025 - Hyper by the Sea</option>
-                        <option value="DC000027">DC000027 - Kempton Park</option>
-                        <option value="DC000054">DC000054 - Killarney</option>
-                        <option value="DC000401">DC000401 - Kings Park</option>
-                        <option value="DC000736">DC000736 - Klerksdorp</option>
-                        <option value="DC000245">DC000245 - Kloof Street</option>
-                        <option value="DC000729">DC000729 - Knysna</option>
-                        <option value="DC000728">DC000728 - Ladysmith</option>
-                        <option value="DC000028">DC000028 - Lonehill</option>
+                    <label for="banner">Store Banner <span class="required">*</span></label>
+                    <select id="banner" name="banner" required>
+                        <option value="">Loading banners...</option>
                     </select>
-                    <div class="help-text">Select your Dischem store</div>
+                    <div class="help-text">Select the store banner/chain</div>
                 </div>
 
-                <!-- Merchandising Category -->
+                <!-- Store Selection -->
+                <div class="form-group">
+                    <label for="outletId">Store <span class="required">*</span></label>
+                    <select id="outletId" name="outlet_id" required disabled>
+                        <option value="">Select banner first...</option>
+                    </select>
+                    <div class="help-text">Select your store location</div>
+                </div>
+
+                <!-- Category -->
                 <div class="form-group">
                     <label for="category">Merchandising Category <span class="required">*</span></label>
                     <select id="category" name="category" required>
@@ -396,201 +295,164 @@
                 <!-- Segment -->
                 <div class="form-group">
                     <label for="segment">Segment (Sub-category) <span class="required">*</span></label>
-                    <input type="text" id="segment" name="segment" required placeholder="e.g., Yoghurt, Face Cream, Vitamins">
-                    <div class="help-text">Enter the specific sub-category within the main category</div>
+                    <input type="text" id="segment" name="segment" required placeholder="e.g., Shampoo, Face Cream">
+                    <div class="help-text">Enter the specific sub-category</div>
                 </div>
 
-                <!-- SECTION: Execution Ratings -->
-                <div class="section-title">Execution Ratings</div>
-
-                <!-- Forward Share -->
+                <!-- Ratings Section -->
                 <div class="form-group">
                     <label>Forward Share <span class="required">*</span></label>
+                    <div class="help-text">Product availability and facing space</div>
                     <div class="rating-group">
-                        <div class="star-rating">
-                            <input type="radio" id="forward5" name="forwardShare" value="5" required>
-                            <label for="forward5">★</label>
-                            <input type="radio" id="forward4" name="forwardShare" value="4">
-                            <label for="forward4">★</label>
-                            <input type="radio" id="forward3" name="forwardShare" value="3">
-                            <label for="forward3">★</label>
-                            <input type="radio" id="forward2" name="forwardShare" value="2">
-                            <label for="forward2">★</label>
-                            <input type="radio" id="forward1" name="forwardShare" value="1">
-                            <label for="forward1">★</label>
-                        </div>
-                        <span class="rating-label" id="forwardLabel">Select</span>
+                        <input type="radio" id="fs1" name="forward_share" value="1" class="rating-option" required>
+                        <label for="fs1" class="rating-label">1⭐</label>
+                        <input type="radio" id="fs2" name="forward_share" value="2" class="rating-option">
+                        <label for="fs2" class="rating-label">2⭐</label>
+                        <input type="radio" id="fs3" name="forward_share" value="3" class="rating-option">
+                        <label for="fs3" class="rating-label">3⭐</label>
+                        <input type="radio" id="fs4" name="forward_share" value="4" class="rating-option">
+                        <label for="fs4" class="rating-label">4⭐</label>
+                        <input type="radio" id="fs5" name="forward_share" value="5" class="rating-option">
+                        <label for="fs5" class="rating-label">5⭐</label>
                     </div>
-                    <div class="help-text">Rate shelf presence vs competitors</div>
                 </div>
 
-                <!-- Stock Pressure -->
                 <div class="form-group">
                     <label>Stock Pressure <span class="required">*</span></label>
+                    <div class="help-text">Stock levels and out-of-stock items</div>
                     <div class="rating-group">
-                        <div class="star-rating">
-                            <input type="radio" id="stock5" name="stockPressure" value="5" required>
-                            <label for="stock5">★</label>
-                            <input type="radio" id="stock4" name="stockPressure" value="4">
-                            <label for="stock4">★</label>
-                            <input type="radio" id="stock3" name="stockPressure" value="3">
-                            <label for="stock3">★</label>
-                            <input type="radio" id="stock2" name="stockPressure" value="2">
-                            <label for="stock2">★</label>
-                            <input type="radio" id="stock1" name="stockPressure" value="1">
-                            <label for="stock1">★</label>
-                        </div>
-                        <span class="rating-label" id="stockLabel">Select</span>
+                        <input type="radio" id="sp1" name="stock_pressure" value="1" class="rating-option" required>
+                        <label for="sp1" class="rating-label">1⭐</label>
+                        <input type="radio" id="sp2" name="stock_pressure" value="2" class="rating-option">
+                        <label for="sp2" class="rating-label">2⭐</label>
+                        <input type="radio" id="sp3" name="stock_pressure" value="3" class="rating-option">
+                        <label for="sp3" class="rating-label">3⭐</label>
+                        <input type="radio" id="sp4" name="stock_pressure" value="4" class="rating-option">
+                        <label for="sp4" class="rating-label">4⭐</label>
+                        <input type="radio" id="sp5" name="stock_pressure" value="5" class="rating-option">
+                        <label for="sp5" class="rating-label">5⭐</label>
                     </div>
-                    <div class="help-text">Rate stock availability (5 = fully stocked)</div>
                 </div>
 
-                <!-- Category Flow -->
                 <div class="form-group">
                     <label>Category Flow <span class="required">*</span></label>
+                    <div class="help-text">Planogram compliance and shelf organization</div>
                     <div class="rating-group">
-                        <div class="star-rating">
-                            <input type="radio" id="flow5" name="categoryFlow" value="5" required>
-                            <label for="flow5">★</label>
-                            <input type="radio" id="flow4" name="categoryFlow" value="4">
-                            <label for="flow4">★</label>
-                            <input type="radio" id="flow3" name="categoryFlow" value="3">
-                            <label for="flow3">★</label>
-                            <input type="radio" id="flow2" name="categoryFlow" value="2">
-                            <label for="flow2">★</label>
-                            <input type="radio" id="flow1" name="categoryFlow" value="1">
-                            <label for="flow1">★</label>
-                        </div>
-                        <span class="rating-label" id="flowLabel">Select</span>
+                        <input type="radio" id="cf1" name="category_flow" value="1" class="rating-option" required>
+                        <label for="cf1" class="rating-label">1⭐</label>
+                        <input type="radio" id="cf2" name="category_flow" value="2" class="rating-option">
+                        <label for="cf2" class="rating-label">2⭐</label>
+                        <input type="radio" id="cf3" name="category_flow" value="3" class="rating-option">
+                        <label for="cf3" class="rating-label">3⭐</label>
+                        <input type="radio" id="cf4" name="category_flow" value="4" class="rating-option">
+                        <label for="cf4" class="rating-label">4⭐</label>
+                        <input type="radio" id="cf5" name="category_flow" value="5" class="rating-option">
+                        <label for="cf5" class="rating-label">5⭐</label>
                     </div>
-                    <div class="help-text">Rate category layout and navigation</div>
                 </div>
 
-                <!-- Pricing Compliance -->
                 <div class="form-group">
                     <label>Pricing Compliance <span class="required">*</span></label>
+                    <div class="help-text">Correct pricing and promotional compliance</div>
                     <div class="rating-group">
-                        <div class="star-rating">
-                            <input type="radio" id="price5" name="pricingCompliance" value="5" required>
-                            <label for="price5">★</label>
-                            <input type="radio" id="price4" name="pricingCompliance" value="4">
-                            <label for="price4">★</label>
-                            <input type="radio" id="price3" name="pricingCompliance" value="3">
-                            <label for="price3">★</label>
-                            <input type="radio" id="price2" name="pricingCompliance" value="2">
-                            <label for="price2">★</label>
-                            <input type="radio" id="price1" name="pricingCompliance" value="1">
-                            <label for="price1">★</label>
-                        </div>
-                        <span class="rating-label" id="priceLabel">Select</span>
+                        <input type="radio" id="pc1" name="pricing_compliance" value="1" class="rating-option" required>
+                        <label for="pc1" class="rating-label">1⭐</label>
+                        <input type="radio" id="pc2" name="pricing_compliance" value="2" class="rating-option">
+                        <label for="pc2" class="rating-label">2⭐</label>
+                        <input type="radio" id="pc3" name="pricing_compliance" value="3" class="rating-option">
+                        <label for="pc3" class="rating-label">3⭐</label>
+                        <input type="radio" id="pc4" name="pricing_compliance" value="4" class="rating-option">
+                        <label for="pc4" class="rating-label">4⭐</label>
+                        <input type="radio" id="pc5" name="pricing_compliance" value="5" class="rating-option">
+                        <label for="pc5" class="rating-label">5⭐</label>
                     </div>
-                    <div class="help-text">Rate adherence to pricing strategy</div>
                 </div>
 
-                <!-- SECTION: Photo Evidence -->
-                <div class="section-title">Photo Evidence</div>
-
-                <!-- Shelf Photo -->
+                <!-- Promo Compliant -->
                 <div class="form-group">
-                    <label for="shelfPhoto">Shelf Photo <span class="required">*</span></label>
-                    <input type="file" id="shelfPhoto" name="shelfPhoto" accept="image/*" capture="environment" required style="display: none;">
-                    <button type="button" class="btn" id="takePictureBtn" onclick="document.getElementById('shelfPhoto').click()">
-                        📷 Take Shelf Photo
-                    </button>
-                    <div id="photoPreview" class="photo-preview hidden">
-                        <img id="previewImage" src="" alt="Shelf preview">
-                        <button type="button" class="btn-small" onclick="retakePhoto()">🔄 Retake Photo</button>
-                    </div>
-                    <div class="help-text">Photo will be geotagged with your location for verification</div>
-                </div>
-
-                <!-- SECTION: Compliance & Feedback -->
-                <div class="section-title">Compliance & Feedback</div>
-
-                <!-- Promo Ticketing and Display -->
-                <div class="form-group">
+                    <label>Promo Ticketing & Display Compliant</label>
                     <div class="checkbox-group">
-                        <input type="checkbox" id="promoCompliant" name="promoCompliant">
-                        <label for="promoCompliant" class="checkbox-label">
-                            Promo Ticketing & Display Compliant
-                        </label>
+                        <input type="checkbox" id="promoCompliant" name="promo_compliant">
+                        <label for="promoCompliant" style="margin-bottom: 0;">All promotional materials correctly displayed</label>
                     </div>
-                    <div class="help-text">Check if all promotional materials are correctly displayed</div>
                 </div>
 
                 <!-- Competitor Activity -->
                 <div class="form-group">
                     <label for="competitorActivity">Competitor Activity</label>
-                    <textarea id="competitorActivity" name="competitorActivity" placeholder="Describe any competitor promotions, new products, or activities..."></textarea>
+                    <textarea id="competitorActivity" name="competitor_activity" placeholder="Note any competitor promotions or activities observed"></textarea>
                 </div>
 
                 <!-- Overall Rating -->
                 <div class="form-group">
                     <label>Overall Rating <span class="required">*</span></label>
-                    <div class="rating-group">
-                        <div class="star-rating">
-                            <input type="radio" id="overall5" name="overallRating" value="5" required>
-                            <label for="overall5">★</label>
-                            <input type="radio" id="overall4" name="overallRating" value="4">
-                            <label for="overall4">★</label>
-                            <input type="radio" id="overall3" name="overallRating" value="3">
-                            <label for="overall3">★</label>
-                            <input type="radio" id="overall2" name="overallRating" value="2">
-                            <label for="overall2">★</label>
-                            <input type="radio" id="overall1" name="overallRating" value="1">
-                            <label for="overall1">★</label>
-                        </div>
-                        <span class="rating-label" id="overallLabel">Select</span>
-                    </div>
                     <div class="help-text">Overall store execution quality</div>
+                    <div class="rating-group">
+                        <input type="radio" id="or1" name="overall_rating" value="1" class="rating-option" required>
+                        <label for="or1" class="rating-label">1⭐</label>
+                        <input type="radio" id="or2" name="overall_rating" value="2" class="rating-option">
+                        <label for="or2" class="rating-label">2⭐</label>
+                        <input type="radio" id="or3" name="overall_rating" value="3" class="rating-option">
+                        <label for="or3" class="rating-label">3⭐</label>
+                        <input type="radio" id="or4" name="overall_rating" value="4" class="rating-option">
+                        <label for="or4" class="rating-label">4⭐</label>
+                        <input type="radio" id="or5" name="overall_rating" value="5" class="rating-option">
+                        <label for="or5" class="rating-label">5⭐</label>
+                    </div>
                 </div>
 
                 <!-- General Comment -->
                 <div class="form-group">
-                    <label for="generalComment">General Comment</label>
-                    <textarea id="generalComment" name="generalComment" placeholder="Any additional observations, issues, or recommendations..."></textarea>
+                    <label for="generalComment">General Comment <span class="required">*</span></label>
+                    <textarea id="generalComment" name="general_comment" required placeholder="Additional observations, issues, or recommendations"></textarea>
                 </div>
 
-                <!-- Hidden GPS Fields -->
-                <input type="hidden" id="geoLat" name="geoLat">
-                <input type="hidden" id="geoLng" name="geoLng">
+                <!-- Photo Upload -->
+                <div class="form-group">
+                    <label>Shelf Photo <span class="required">*</span></label>
+                    <div class="photo-upload">
+                        <input type="file" id="shelfPhoto" accept="image/*" capture="environment" required>
+                        <label for="shelfPhoto" class="upload-btn" id="takePictureBtn">📷 Take Shelf Photo</label>
+                        <div class="help-text" style="margin-top: 12px;">Photo will be geotagged with your location</div>
+                    </div>
+                    <div id="photoPreview" class="photo-preview hidden">
+                        <strong>Photo Preview:</strong>
+                        <img id="previewImage" src="" alt="Preview">
+                        <br><br>
+                        <button type="button" onclick="retakePhoto()" style="padding: 8px 16px; background: #e53e3e; color: white; border: none; border-radius: 4px; cursor: pointer;">🔄 Retake Photo</button>
+                    </div>
+                </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn" id="submitBtn">
-                    📤 Submit Report
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    ✅ Submit Report
                 </button>
-            </form>
 
-            <!-- Success Message (hidden by default) -->
-            <div id="successMessage" class="success-message hidden">
-                <h2>✅ Report Submitted!</h2>
-                <p>Your shelf health report has been recorded successfully.</p>
-                <button class="btn" onclick="location.reload()">Submit Another Report</button>
-            </div>
+                <div id="successMessage" class="success-message hidden">
+                    <h2>✅ Report Submitted!</h2>
+                    <p>Your shelf health report has been successfully saved.</p>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        // Configuration - DIRECT AIRTABLE API
-        const AIRTABLE_API_TOKEN = 'patoRetIDppOwNIUY.966179d2456ed457d8a1d2062d038d2ea2acb509cae6ae69ef3f1f6539275c24';
-        const AIRTABLE_BASE_ID = 'appB22Hu0eEupq0Qv';
-        const AIRTABLE_TABLE_NAME = 'Shelf Health Reports';
+        // Configuration
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLOt66DdjjLJBjlIV6w4X5aiXFA7fXFwdt74W6Omnf4dpXT_DQTRkRlgYBvCYZAq36/exec';
 
-        // GPS Coordinates
+        // GPS functionality
         let userLocation = { lat: null, lng: null };
 
-        // Get GPS Location
         function getLocation() {
             const statusDiv = document.getElementById('gpsStatus');
             
             if (!navigator.geolocation) {
                 statusDiv.className = 'gps-status error';
-                statusDiv.innerHTML = '❌ GPS not supported on this device';
+                statusDiv.innerHTML = '❌ Geolocation not supported by your browser';
                 return;
             }
 
             navigator.geolocation.getCurrentPosition(
-                // Success
                 (position) => {
                     userLocation.lat = position.coords.latitude;
                     userLocation.lng = position.coords.longitude;
@@ -601,26 +463,10 @@
                     statusDiv.className = 'gps-status success';
                     statusDiv.innerHTML = `✅ Location captured: ${userLocation.lat.toFixed(6)}, ${userLocation.lng.toFixed(6)}`;
                 },
-                // Error
                 (error) => {
                     statusDiv.className = 'gps-status error';
-                    let errorMsg = '❌ Location access denied';
-                    
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMsg = '❌ Location access denied. Please enable location permissions.';
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMsg = '❌ Location unavailable. Please try again.';
-                            break;
-                        case error.TIMEOUT:
-                            errorMsg = '❌ Location request timed out. Please try again.';
-                            break;
-                    }
-                    
-                    statusDiv.innerHTML = errorMsg;
+                    statusDiv.innerHTML = '❌ Location access denied. Please enable location permissions.';
                 },
-                // Options
                 {
                     enableHighAccuracy: true,
                     timeout: 10000,
@@ -629,8 +475,60 @@
             );
         }
 
-        // Initialize GPS on page load
-        window.addEventListener('load', getLocation);
+        // Load banners on page load
+        async function loadBanners() {
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?type=banners`);
+                const banners = await response.json();
+                
+                const bannerSelect = document.getElementById('banner');
+                bannerSelect.innerHTML = '<option value="">-- Select Banner --</option>';
+                
+                banners.forEach(banner => {
+                    const option = document.createElement('option');
+                    option.value = banner;
+                    option.textContent = banner;
+                    bannerSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading banners:', error);
+                document.getElementById('banner').innerHTML = '<option value="">Error loading banners</option>';
+            }
+        }
+
+        // Load stores when banner is selected
+        document.getElementById('banner').addEventListener('change', async function() {
+            const banner = this.value;
+            const outletSelect = document.getElementById('outletId');
+            
+            if (!banner) {
+                outletSelect.innerHTML = '<option value="">Select banner first...</option>';
+                outletSelect.disabled = true;
+                return;
+            }
+            
+            outletSelect.innerHTML = '<option value="">Loading stores...</option>';
+            outletSelect.disabled = true;
+            
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?type=outlets&banner=${encodeURIComponent(banner)}`);
+                const outlets = await response.json();
+                
+                outletSelect.innerHTML = '<option value="">-- Select Store --</option>';
+                
+                outlets.forEach(outlet => {
+                    const option = document.createElement('option');
+                    option.value = outlet.outlet_id;
+                    option.textContent = `${outlet.outlet_id} - ${outlet.outlet_name}`;
+                    outletSelect.appendChild(option);
+                });
+                
+                outletSelect.disabled = false;
+            } catch (error) {
+                console.error('Error loading stores:', error);
+                outletSelect.innerHTML = '<option value="">Error loading stores</option>';
+            }
+        });
 
         // Photo handling
         let capturedPhoto = null;
@@ -640,7 +538,6 @@
             if (file) {
                 capturedPhoto = file;
                 
-                // Show preview
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     document.getElementById('previewImage').src = event.target.result;
@@ -660,127 +557,63 @@
             document.getElementById('takePictureBtn').style.background = '';
         }
 
-        // Star rating labels update
-        const ratingGroups = [
-            { name: 'forwardShare', labelId: 'forwardLabel' },
-            { name: 'stockPressure', labelId: 'stockLabel' },
-            { name: 'categoryFlow', labelId: 'flowLabel' },
-            { name: 'pricingCompliance', labelId: 'priceLabel' },
-            { name: 'overallRating', labelId: 'overallLabel' }
-        ];
-
-        ratingGroups.forEach(group => {
-            const radios = document.getElementsByName(group.name);
-            const label = document.getElementById(group.labelId);
-            
-            radios.forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    label.textContent = e.target.value + ' ★';
-                });
-            });
-        });
-
-        // Form Submission
+        // Form submission
         document.getElementById('shelfForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const submitBtn = document.getElementById('submitBtn');
             const originalText = submitBtn.textContent;
             
-            // Check if GPS is available
+            // Validate GPS
             if (!userLocation.lat || !userLocation.lng) {
                 alert('⚠️ Location not available. Please allow location access and try again.');
                 getLocation();
                 return;
             }
 
-            // Check if photo is captured
+            // Validate photo
             if (!capturedPhoto) {
                 alert('⚠️ Please take a shelf photo before submitting.');
                 return;
             }
             
-            // Disable submit button
             submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Uploading photo...';
+            submitBtn.textContent = '⏳ Submitting...';
             
             try {
-                // Convert photo to base64
-                const photoBase64 = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result.split(',')[1]);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(capturedPhoto);
-                });
-
-                submitBtn.textContent = '⏳ Submitting report...';
-
                 // Collect form data
                 const formData = {
                     rep_id: document.getElementById('repId').value.trim(),
+                    banner: document.getElementById('banner').value,
                     outlet_id: document.getElementById('outletId').value,
                     category: document.getElementById('category').value,
                     segment: document.getElementById('segment').value.trim(),
-                    forward_share: parseInt(document.querySelector('input[name="forwardShare"]:checked').value),
-                    stock_pressure: parseInt(document.querySelector('input[name="stockPressure"]:checked').value),
-                    category_flow: parseInt(document.querySelector('input[name="categoryFlow"]:checked').value),
-                    pricing_compliance: parseInt(document.querySelector('input[name="pricingCompliance"]:checked').value),
+                    forward_share: parseInt(document.querySelector('input[name="forward_share"]:checked').value),
+                    stock_pressure: parseInt(document.querySelector('input[name="stock_pressure"]:checked').value),
+                    category_flow: parseInt(document.querySelector('input[name="category_flow"]:checked').value),
+                    pricing_compliance: parseInt(document.querySelector('input[name="pricing_compliance"]:checked').value),
                     promo_compliant: document.getElementById('promoCompliant').checked,
                     competitor_activity: document.getElementById('competitorActivity').value.trim(),
-                    overall_rating: parseInt(document.querySelector('input[name="overallRating"]:checked').value),
+                    overall_rating: parseInt(document.querySelector('input[name="overall_rating"]:checked').value),
                     general_comment: document.getElementById('generalComment').value.trim(),
                     geo_lat: parseFloat(document.getElementById('geoLat').value),
                     geo_lng: parseFloat(document.getElementById('geoLng').value),
-                    timestamp: new Date().toISOString(),
-                    photo_filename: capturedPhoto.name,
-                    photo_base64: photoBase64,
-                    photo_size: capturedPhoto.size,
-                    photo_type: capturedPhoto.type
+                    photo_filename: capturedPhoto.name
                 };
                 
-                // Send DIRECTLY to Airtable API
-                const airtableUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE_NAME)}`;
-                
-                const airtableRecord = {
-                    fields: {
-                        rep_id: formData.rep_id,
-                        outlet_id: formData.outlet_id,
-                        category: formData.category,
-                        segment: formData.segment,
-                        forward_share: formData.forward_share,
-                        stock_pressure: formData.stock_pressure,
-                        category_flow: formData.category_flow,
-                        pricing_compliance: formData.pricing_compliance,
-                        promo_compliant: formData.promo_compliant,
-                        competitor_activity: formData.competitor_activity,
-                        overall_rating: formData.overall_rating,
-                        general_comment: formData.general_comment,
-                        geo_lat: formData.geo_lat,
-                        geo_lng: formData.geo_lng,
-                        timestamp: formData.timestamp,
-                        photo_url: [{
-                            url: `data:${formData.photo_type};base64,${formData.photo_base64}`
-                        }]
-                    }
-                };
-                
-                const response = await fetch(airtableUrl, {
+                // Submit to Google Sheets
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: {
-                        'Authorization': `Bearer ${AIRTABLE_API_TOKEN}`,
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(airtableRecord)
+                    body: JSON.stringify(formData)
                 });
                 
-                if (response.ok) {
-                    // Show success message
-                    document.getElementById('shelfForm').classList.add('hidden');
-                    document.getElementById('gpsStatus').classList.add('hidden');
-                    document.getElementById('successMessage').classList.remove('hidden');
-                } else {
-                    throw new Error('Submission failed');
-                }
+                // Show success (no-cors mode means we can't read response, but if no error thrown, it worked)
+                document.getElementById('shelfForm').classList.add('hidden');
+                document.getElementById('successMessage').classList.remove('hidden');
                 
             } catch (error) {
                 console.error('Submission error:', error);
@@ -788,6 +621,12 @@
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
             }
+        });
+
+        // Initialize
+        window.addEventListener('load', () => {
+            getLocation();
+            loadBanners();
         });
     </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shelf Health Report</title>
+    <title>FieldView - Instore Audit</title>
     <style>
         * {
             margin: 0;
@@ -35,13 +35,15 @@
         }
 
         .header h1 {
-            font-size: 24px;
+            font-size: 32px;
             margin-bottom: 8px;
+            font-weight: 700;
         }
 
         .header p {
             font-size: 14px;
             opacity: 0.9;
+            letter-spacing: 0.5px;
         }
 
         .form-container {
@@ -225,18 +227,44 @@
         .success-message {
             background: #c6f6d5;
             color: #22543d;
-            padding: 20px;
+            padding: 30px 20px;
             border-radius: 8px;
             text-align: center;
-            margin-top: 20px;
+        }
+
+        .success-message h2 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .success-message p {
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        .another-btn {
+            background: #667eea;
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .another-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Shelf Health Report</h1>
-            <p>Complete merchandising audit form</p>
+            <h1>📊 FieldView</h1>
+            <p>Instore Audit Excellence</p>
         </div>
 
         <div class="form-container">
@@ -413,7 +441,7 @@
                     <div class="photo-upload">
                         <input type="file" id="shelfPhoto" accept="image/*" capture="environment" required>
                         <label for="shelfPhoto" class="upload-btn" id="takePictureBtn">📷 Take Shelf Photo</label>
-                        <div class="help-text" style="margin-top: 12px;">Photo will be geotagged with your location</div>
+                        <div class="help-text" style="margin-top: 12px;">Photo will be saved to Google Drive</div>
                     </div>
                     <div id="photoPreview" class="photo-preview hidden">
                         <strong>Photo Preview:</strong>
@@ -427,12 +455,16 @@
                 <button type="submit" class="submit-btn" id="submitBtn">
                     ✅ Submit Report
                 </button>
-
-                <div id="successMessage" class="success-message hidden">
-                    <h2>✅ Report Submitted!</h2>
-                    <p>Your shelf health report has been successfully saved.</p>
-                </div>
             </form>
+
+            <!-- Success Message -->
+            <div id="successMessage" class="success-message hidden">
+                <h2>✅ Report Submitted!</h2>
+                <p>Your audit has been successfully saved to Google Sheets and your photo has been uploaded to Google Drive.</p>
+                <button onclick="submitAnother()" class="another-btn">
+                    📝 Submit Another Audit
+                </button>
+            </div>
         </div>
     </div>
 
@@ -578,9 +610,19 @@
             }
             
             submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Submitting...';
+            submitBtn.textContent = '⏳ Uploading photo...';
             
             try {
+                // Convert photo to base64
+                const photoBase64 = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(capturedPhoto);
+                });
+
+                submitBtn.textContent = '⏳ Submitting data...';
+                
                 // Collect form data
                 const formData = {
                     rep_id: document.getElementById('repId').value.trim(),
@@ -598,30 +640,54 @@
                     general_comment: document.getElementById('generalComment').value.trim(),
                     geo_lat: parseFloat(document.getElementById('geoLat').value),
                     geo_lng: parseFloat(document.getElementById('geoLng').value),
-                    photo_filename: capturedPhoto.name
+                    photo_filename: capturedPhoto.name,
+                    photo_base64: photoBase64,
+                    photo_type: capturedPhoto.type
                 };
                 
                 // Submit to Google Sheets
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
                     body: JSON.stringify(formData)
                 });
                 
-                // Show success (no-cors mode means we can't read response, but if no error thrown, it worked)
-                document.getElementById('shelfForm').classList.add('hidden');
-                document.getElementById('successMessage').classList.remove('hidden');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Show success message
+                    document.getElementById('shelfForm').classList.add('hidden');
+                    document.getElementById('successMessage').classList.remove('hidden');
+                } else {
+                    throw new Error(result.message || 'Submission failed');
+                }
                 
             } catch (error) {
                 console.error('Submission error:', error);
-                alert('❌ Failed to submit report. Please check your connection and try again.');
+                alert('❌ Failed to submit report. Please check your connection and try again.\n\nError: ' + error.message);
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
             }
         });
+
+        // Submit another audit
+        function submitAnother() {
+            // Reset form
+            document.getElementById('shelfForm').reset();
+            capturedPhoto = null;
+            document.getElementById('photoPreview').classList.add('hidden');
+            document.getElementById('takePictureBtn').textContent = '📷 Take Shelf Photo';
+            document.getElementById('takePictureBtn').style.background = '';
+            
+            // Show form, hide success
+            document.getElementById('shelfForm').classList.remove('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+            
+            // Reload GPS
+            getLocation();
+        }
 
         // Initialize
         window.addEventListener('load', () => {

@@ -222,10 +222,6 @@
             transform: translateY(-2px);
         }
 
-        .submit-btn:hover {
-            transform: translateY(-2px);
-        }
-
         .submit-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -606,22 +602,80 @@
             }
         });
 
-        // Photo handling
+        // Photo handling with compression
         let capturedPhoto = null;
 
-        document.getElementById('shelfPhoto').addEventListener('change', function(e) {
+        // Compress image to max 800px width
+        async function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        // Calculate new dimensions
+                        let width = img.width;
+                        let height = img.height;
+                        const maxWidth = 800;
+                        
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+                        
+                        // Create canvas and resize
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Convert to blob
+                        canvas.toBlob((blob) => {
+                            resolve(new File([blob], file.name, {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            }));
+                        }, 'image/jpeg', 0.85); // 85% quality
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        document.getElementById('shelfPhoto').addEventListener('change', async function(e) {
             const file = e.target.files[0];
             if (file) {
-                capturedPhoto = file;
+                // Show compressing message
+                const statusDiv = document.getElementById('gpsStatus');
+                const originalStatus = statusDiv.innerHTML;
+                statusDiv.className = 'gps-status loading';
+                statusDiv.innerHTML = '🔄 Compressing image...';
                 
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    document.getElementById('previewImage').src = event.target.result;
-                    document.getElementById('photoPreview').classList.remove('hidden');
-                    document.getElementById('takePictureBtn').textContent = '✅ Photo Captured';
-                    document.getElementById('takePictureBtn').style.background = '#10b981';
-                };
-                reader.readAsDataURL(file);
+                try {
+                    // Compress the image
+                    capturedPhoto = await compressImage(file);
+                    
+                    // Show preview
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        document.getElementById('previewImage').src = event.target.result;
+                        document.getElementById('photoPreview').classList.remove('hidden');
+                        document.getElementById('takePictureBtn').textContent = '✅ Photo Captured';
+                        document.getElementById('takePictureBtn').style.background = '#10b981';
+                        
+                        // Calculate compression ratio
+                        const compressionRatio = ((1 - capturedPhoto.size / file.size) * 100).toFixed(0);
+                        statusDiv.innerHTML = originalStatus + ` | 📸 Image compressed ${compressionRatio}%`;
+                    };
+                    reader.readAsDataURL(capturedPhoto);
+                } catch (error) {
+                    console.error('Compression error:', error);
+                    capturedPhoto = file; // Use original if compression fails
+                    statusDiv.innerHTML = originalStatus;
+                }
             }
         });
 
@@ -639,6 +693,9 @@
             
             const submitBtn = document.getElementById('submitBtn');
             const originalText = submitBtn.textContent;
+            
+            // Save last selections for next time
+            saveLastSelections();
             
             // Validate GPS
             if (!userLocation.lat || !userLocation.lng) {
@@ -729,15 +786,63 @@
             // Scroll to top
             window.scrollTo(0, 0);
             
-            // Reload GPS
+            // Reload GPS and restore last selections
             getLocation();
+            restoreLastSelections();
         }
 
         // Initialize
         window.addEventListener('load', () => {
             getLocation();
             loadBanners();
+            restoreLastSelections();
         });
+
+        // Restore last selections from localStorage
+        function restoreLastSelections() {
+            const lastRepId = localStorage.getItem('fieldview_last_rep_id');
+            const lastBanner = localStorage.getItem('fieldview_last_banner');
+            const lastOutlet = localStorage.getItem('fieldview_last_outlet');
+            
+            if (lastRepId) {
+                document.getElementById('repId').value = lastRepId;
+            }
+            
+            // Wait for banners to load, then set last banner
+            if (lastBanner) {
+                const checkBanners = setInterval(() => {
+                    const bannerSelect = document.getElementById('banner');
+                    if (bannerSelect.options.length > 1) {
+                        bannerSelect.value = lastBanner;
+                        // Trigger change to load stores
+                        bannerSelect.dispatchEvent(new Event('change'));
+                        clearInterval(checkBanners);
+                        
+                        // Wait for stores to load, then set last outlet
+                        if (lastOutlet) {
+                            const checkStores = setInterval(() => {
+                                const outletSelect = document.getElementById('outletId');
+                                if (!outletSelect.disabled && outletSelect.options.length > 1) {
+                                    outletSelect.value = lastOutlet;
+                                    clearInterval(checkStores);
+                                }
+                            }, 100);
+                        }
+                    }
+                }, 100);
+            }
+        }
+
+        // Save selections to localStorage
+        function saveLastSelections() {
+            const repId = document.getElementById('repId').value;
+            const banner = document.getElementById('banner').value;
+            const outletId = document.getElementById('outletId').value;
+            
+            if (repId) localStorage.setItem('fieldview_last_rep_id', repId);
+            if (banner) localStorage.setItem('fieldview_last_banner', banner);
+            if (outletId) localStorage.setItem('fieldview_last_outlet', outletId);
+        }
     </script>
 </body>
 </html>

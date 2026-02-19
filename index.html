@@ -222,6 +222,10 @@
             transform: translateY(-2px);
         }
 
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
         .submit-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -354,10 +358,17 @@
                 <!-- Store Selection -->
                 <div class="form-group">
                     <label for="outletId">Store <span class="required">*</span></label>
-                    <select id="outletId" name="outlet_id" required disabled>
-                        <option value="">Select banner first...</option>
-                    </select>
-                    <div class="help-text">Select your store location</div>
+                    <input 
+                        type="text" 
+                        id="outletId" 
+                        name="outlet_id" 
+                        list="storeList"
+                        required 
+                        disabled
+                        placeholder="Select banner first..."
+                        autocomplete="off">
+                    <datalist id="storeList"></datalist>
+                    <div class="help-text">Start typing to search stores or use dropdown</div>
                     <div id="lastVisitInfo" class="last-visit-info hidden"></div>
                 </div>
 
@@ -594,50 +605,72 @@
         // Load stores when banner is selected
         document.getElementById('banner').addEventListener('change', async function() {
             const banner = this.value;
-            const outletSelect = document.getElementById('outletId');
+            const outletInput = document.getElementById('outletId');
+            const storeList = document.getElementById('storeList');
             
             // Hide last visit info when banner changes
             document.getElementById('lastVisitInfo').classList.add('hidden');
             
             if (!banner) {
-                outletSelect.innerHTML = '<option value="">Select banner first...</option>';
-                outletSelect.disabled = true;
+                outletInput.placeholder = 'Select banner first...';
+                outletInput.disabled = true;
+                outletInput.value = '';
+                storeList.innerHTML = '';
                 return;
             }
             
-            outletSelect.innerHTML = '<option value="">Loading stores...</option>';
-            outletSelect.disabled = true;
+            outletInput.placeholder = 'Loading stores...';
+            outletInput.disabled = true;
+            outletInput.value = '';
             
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?type=outlets&banner=${encodeURIComponent(banner)}`);
                 const outlets = await response.json();
                 
-                outletSelect.innerHTML = '<option value="">-- Select Store --</option>';
+                // Store outlets data globally for validation
+                window.availableStores = outlets;
                 
+                // Populate datalist
+                storeList.innerHTML = '';
                 outlets.forEach(outlet => {
                     const option = document.createElement('option');
-                    option.value = outlet.outlet_id;
-                    option.textContent = `${outlet.outlet_id} - ${outlet.outlet_name}`;
-                    outletSelect.appendChild(option);
+                    option.value = `${outlet.outlet_id} - ${outlet.outlet_name}`;
+                    option.setAttribute('data-outlet-id', outlet.outlet_id);
+                    storeList.appendChild(option);
                 });
                 
-                outletSelect.disabled = false;
+                outletInput.placeholder = 'Start typing to search stores...';
+                outletInput.disabled = false;
             } catch (error) {
                 console.error('Error loading stores:', error);
-                outletSelect.innerHTML = '<option value="">Error loading stores</option>';
+                outletInput.placeholder = 'Error loading stores';
             }
         });
 
-        // Check last visit when store is selected
-        document.getElementById('outletId').addEventListener('change', async function() {
-            const outletId = this.value;
-            const repId = document.getElementById('repId').value.trim();
+        // Extract outlet ID from selected value and check last visit
+        document.getElementById('outletId').addEventListener('input', function() {
+            const selectedValue = this.value;
             const lastVisitDiv = document.getElementById('lastVisitInfo');
             
-            if (!outletId || !repId) {
+            // Extract outlet ID from "DC000024 - Fourways" format
+            const match = selectedValue.match(/^([A-Z0-9]+)\s*-/);
+            if (match) {
+                const outletId = match[1];
+                const repId = document.getElementById('repId').value.trim();
+                
+                if (outletId && repId) {
+                    checkLastVisit(repId, outletId);
+                } else {
+                    lastVisitDiv.classList.add('hidden');
+                }
+            } else {
                 lastVisitDiv.classList.add('hidden');
-                return;
             }
+        });
+
+        // Helper function to check last visit
+        async function checkLastVisit(repId, outletId) {
+            const lastVisitDiv = document.getElementById('lastVisitInfo');
             
             try {
                 const response = await fetch(`${GOOGLE_SCRIPT_URL}?type=lastvisit&rep_id=${encodeURIComponent(repId)}&outlet_id=${encodeURIComponent(outletId)}`);
@@ -667,7 +700,7 @@
                 console.error('Error checking last visit:', error);
                 lastVisitDiv.classList.add('hidden');
             }
-        });
+        }
 
         // Photo handling with compression
         let capturedPhoto = null;
@@ -792,10 +825,14 @@
                 submitBtn.textContent = '⏳ Submitting data...';
                 
                 // Collect form data
+                const outletValue = document.getElementById('outletId').value;
+                const outletMatch = outletValue.match(/^([A-Z0-9]+)\s*-/);
+                const outletId = outletMatch ? outletMatch[1] : outletValue;
+                
                 const formData = {
                     rep_id: document.getElementById('repId').value.trim(),
                     banner: document.getElementById('banner').value,
-                    outlet_id: document.getElementById('outletId').value,
+                    outlet_id: outletId,
                     category: document.getElementById('category').value,
                     segment: document.getElementById('segment').value.trim(),
                     forward_share: parseInt(document.querySelector('input[name="forward_share"]:checked').value),
@@ -853,9 +890,8 @@
             // Scroll to top
             window.scrollTo(0, 0);
             
-            // Reload GPS and restore last selections
+            // Reload GPS
             getLocation();
-            restoreLastSelections();
         }
 
         // Initialize
@@ -887,13 +923,14 @@
                         
                         // Wait for stores to load, then set last outlet
                         if (lastOutlet) {
-                            const checkStores = setInterval(() => {
-                                const outletSelect = document.getElementById('outletId');
-                                if (!outletSelect.disabled && outletSelect.options.length > 1) {
-                                    outletSelect.value = lastOutlet;
-                                    clearInterval(checkStores);
+                            setTimeout(() => {
+                                const outletInput = document.getElementById('outletId');
+                                if (!outletInput.disabled) {
+                                    outletInput.value = lastOutlet;
+                                    // Trigger input event to check last visit
+                                    outletInput.dispatchEvent(new Event('input'));
                                 }
-                            }, 100);
+                            }, 500);
                         }
                     }
                 }, 100);
@@ -904,11 +941,11 @@
         function saveLastSelections() {
             const repId = document.getElementById('repId').value;
             const banner = document.getElementById('banner').value;
-            const outletId = document.getElementById('outletId').value;
+            const outletValue = document.getElementById('outletId').value;
             
             if (repId) localStorage.setItem('fieldview_last_rep_id', repId);
             if (banner) localStorage.setItem('fieldview_last_banner', banner);
-            if (outletId) localStorage.setItem('fieldview_last_outlet', outletId);
+            if (outletValue) localStorage.setItem('fieldview_last_outlet', outletValue);
         }
     </script>
 </body>

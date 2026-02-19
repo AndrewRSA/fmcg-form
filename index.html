@@ -255,6 +255,28 @@
             margin-top: 4px;
         }
 
+        .last-visit-info {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .last-visit-info.recent {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        .last-visit-info.never {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
         .hidden {
             display: none;
         }
@@ -336,6 +358,7 @@
                         <option value="">Select banner first...</option>
                     </select>
                     <div class="help-text">Select your store location</div>
+                    <div id="lastVisitInfo" class="last-visit-info hidden"></div>
                 </div>
 
                 <!-- Category -->
@@ -573,6 +596,9 @@
             const banner = this.value;
             const outletSelect = document.getElementById('outletId');
             
+            // Hide last visit info when banner changes
+            document.getElementById('lastVisitInfo').classList.add('hidden');
+            
             if (!banner) {
                 outletSelect.innerHTML = '<option value="">Select banner first...</option>';
                 outletSelect.disabled = true;
@@ -599,6 +625,47 @@
             } catch (error) {
                 console.error('Error loading stores:', error);
                 outletSelect.innerHTML = '<option value="">Error loading stores</option>';
+            }
+        });
+
+        // Check last visit when store is selected
+        document.getElementById('outletId').addEventListener('change', async function() {
+            const outletId = this.value;
+            const repId = document.getElementById('repId').value.trim();
+            const lastVisitDiv = document.getElementById('lastVisitInfo');
+            
+            if (!outletId || !repId) {
+                lastVisitDiv.classList.add('hidden');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?type=lastvisit&rep_id=${encodeURIComponent(repId)}&outlet_id=${encodeURIComponent(outletId)}`);
+                const result = await response.json();
+                
+                if (result.found) {
+                    if (result.daysAgo === 0) {
+                        lastVisitDiv.innerHTML = '🕐 Last audited: Today';
+                        lastVisitDiv.className = 'last-visit-info recent';
+                    } else if (result.daysAgo === 1) {
+                        lastVisitDiv.innerHTML = '🕐 Last audited: Yesterday';
+                        lastVisitDiv.className = 'last-visit-info recent';
+                    } else if (result.daysAgo <= 7) {
+                        lastVisitDiv.innerHTML = `🕐 Last audited: ${result.daysAgo} days ago`;
+                        lastVisitDiv.className = 'last-visit-info recent';
+                    } else {
+                        lastVisitDiv.innerHTML = `⚠️ Last audited: ${result.daysAgo} days ago (${result.date})`;
+                        lastVisitDiv.className = 'last-visit-info';
+                    }
+                    lastVisitDiv.classList.remove('hidden');
+                } else {
+                    lastVisitDiv.innerHTML = '✨ First visit to this store!';
+                    lastVisitDiv.className = 'last-visit-info never';
+                    lastVisitDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error checking last visit:', error);
+                lastVisitDiv.classList.add('hidden');
             }
         });
 

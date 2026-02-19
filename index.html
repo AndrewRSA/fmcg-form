@@ -850,13 +850,23 @@
                     photo_type: capturedPhoto.type
                 };
                 
+                console.log('📤 Sending data to:', GOOGLE_SCRIPT_URL);
+                console.log('📦 Form data:', formData);
+                
                 // Submit to Google Sheets
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify(formData)
                 });
                 
+                console.log('📥 Response status:', response.status);
+                console.log('📥 Response OK:', response.ok);
+                
                 const result = await response.json();
+                console.log('📥 Result:', result);
                 
                 if (result.status === 'success') {
                     // Show success message

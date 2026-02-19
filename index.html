@@ -853,28 +853,23 @@
                 console.log('📤 Sending data to:', GOOGLE_SCRIPT_URL);
                 console.log('📦 Form data:', formData);
                 
-                // Submit to Google Sheets
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                // Submit to Google Sheets with no-cors mode
+                // Note: We can't read the response with no-cors, so we assume success
+                await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(formData)
                 });
                 
-                console.log('📥 Response status:', response.status);
-                console.log('📥 Response OK:', response.ok);
+                console.log('📥 Request sent (no-cors mode - assuming success)');
                 
-                const result = await response.json();
-                console.log('📥 Result:', result);
-                
-                if (result.status === 'success') {
-                    // Show success message
-                    document.getElementById('shelfForm').classList.add('hidden');
-                    document.getElementById('successMessage').classList.remove('hidden');
-                } else {
-                    throw new Error(result.message || 'Submission failed');
-                }
+                // Since no-cors doesn't return response, we assume success
+                // Show success message
+                document.getElementById('shelfForm').classList.add('hidden');
+                document.getElementById('successMessage').classList.remove('hidden');
                 
             } catch (error) {
                 console.error('Submission error:', error);

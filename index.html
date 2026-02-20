@@ -787,14 +787,14 @@
             document.getElementById('takePictureBtn').style.background = '';
         }
 
-        // Form submission
+        // Form submission via hidden iframe (bypasses CORS)
         document.getElementById('shelfForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const submitBtn = document.getElementById('submitBtn');
             const originalText = submitBtn.textContent;
             
-            // Save last selections for next time
+            // Save last selections
             saveLastSelections();
             
             // Validate GPS
@@ -850,25 +850,38 @@
                     photo_type: capturedPhoto.type
                 };
                 
-                console.log('📤 Sending data to:', GOOGLE_SCRIPT_URL);
-                console.log('📦 Form data:', formData);
+                console.log('📤 Sending data via iframe form...');
                 
-                // Submit to Google Sheets via POST
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(formData)
-                });
+                // Create hidden form
+                const hiddenForm = document.createElement('form');
+                hiddenForm.method = 'POST';
+                hiddenForm.action = GOOGLE_SCRIPT_URL;
+                hiddenForm.target = 'hidden_iframe';
+                hiddenForm.style.display = 'none';
                 
-                const result = await response.json();
-                console.log('📥 Result:', result);
+                // Add data as hidden input
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'data';
+                input.value = JSON.stringify(formData);
+                hiddenForm.appendChild(input);
                 
-                if (result.status === 'success') {
-                    // Show success message
+                // Create hidden iframe
+                const iframe = document.createElement('iframe');
+                iframe.name = 'hidden_iframe';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                // Submit form
+                document.body.appendChild(hiddenForm);
+                hiddenForm.submit();
+                
+                // Wait a moment then show success
+                setTimeout(() => {
                     document.getElementById('shelfForm').classList.add('hidden');
                     document.getElementById('successMessage').classList.remove('hidden');
-                } else {
-                    throw new Error(result.message || 'Submission failed');
-                }
+                    document.body.removeChild(hiddenForm);
+                }, 2000);
                 
             } catch (error) {
                 console.error('Submission error:', error);

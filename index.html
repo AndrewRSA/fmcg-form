@@ -853,25 +853,22 @@
                 console.log('📤 Sending data to:', GOOGLE_SCRIPT_URL);
                 console.log('📦 Form data:', formData);
                 
-                // Convert to URLSearchParams for form submission
-                const params = new URLSearchParams();
-                for (const key in formData) {
-                    params.append(key, formData[key]);
-                }
-                
-                console.log('📤 Sending as form data...');
-                
-                // Submit to Google Sheets with GET request (append data to URL)
-                const dataString = encodeURIComponent(JSON.stringify(formData));
-                await fetch(GOOGLE_SCRIPT_URL + '?data=' + dataString, {
-                    method: 'GET'
+                // Submit to Google Sheets via POST
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
                 });
                 
-                console.log('📥 Request sent');
+                const result = await response.json();
+                console.log('📥 Result:', result);
                 
-                // Show success message
-                document.getElementById('shelfForm').classList.add('hidden');
-                document.getElementById('successMessage').classList.remove('hidden');
+                if (result.status === 'success') {
+                    // Show success message
+                    document.getElementById('shelfForm').classList.add('hidden');
+                    document.getElementById('successMessage').classList.remove('hidden');
+                } else {
+                    throw new Error(result.message || 'Submission failed');
+                }
                 
             } catch (error) {
                 console.error('Submission error:', error);

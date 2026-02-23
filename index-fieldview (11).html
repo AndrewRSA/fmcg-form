@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FieldView - Instore Audit</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header-logo {
+            max-width: 180px;
+            height: auto;
+            margin-bottom: 16px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+        }
+
+        .form-container {
+            padding: 30px 20px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #e53e3e;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #dc2626;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .rating-group {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .rating-option {
+            display: none;
+        }
+
+        .rating-label {
+            flex: 1;
+            min-width: 50px;
+            text-align: center;
+            padding: 8px 4px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+
+        @media (max-width: 400px) {
+            .rating-label {
+                font-size: 14px;
+                padding: 6px 2px;
+                min-width: 45px;
+            }
+        }
+
+        .rating-option:checked + .rating-label {
+            background: #dc2626;
+            color: white;
+            border-color: #dc2626;
+        }
+
+        .rating-key {
+            background: #f7fafc;
+            border-left: 4px solid #dc2626;
+            padding: 16px;
+            margin: 24px 0;
+            font-size: 13px;
+            color: #2d3748;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .rating-key strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #dc2626;
+            font-size: 14px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .photo-upload {
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background: #f7fafc;
+        }
+
+        .photo-upload input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            background: #6c757d;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .upload-btn:hover {
+            background: #dc2626;
+        }
+
+        .photo-preview {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f7fafc;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .photo-preview img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .gps-status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .gps-status.loading {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+
+        .gps-status.success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .gps-status.error {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 4px;
+        }
+
+        .last-visit-info {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .last-visit-info.recent {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        .last-visit-info.never {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .success-message {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 30px 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .success-message h2 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .success-message p {
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        .another-btn {
+            background: #6c757d;
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .another-btn:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://raw.githubusercontent.com/andrewrsa/fmcg-form/main/fieldview-logo.png" alt="FieldView Logo" class="header-logo">
+            <p>Instore Audit Excellence</p>
+        </div>
+
+        <div class="form-container">
+            <!-- GPS Status -->
+            <div id="gpsStatus" class="gps-status loading">
+                📍 Getting your location...
+            </div>
+
+            <form id="shelfForm">
+                <!-- Hidden GPS Fields -->
+                <input type="hidden" id="geoLat" name="geo_lat">
+                <input type="hidden" id="geoLng" name="geo_lng">
+
+                <!-- Rep ID -->
+                <div class="form-group">
+                    <label for="repId">Rep ID <span class="required">*</span></label>
+                    <input type="text" id="repId" name="rep_id" required placeholder="e.g., REP001">
+                    <div class="help-text">Enter your unique representative ID</div>
+                </div>
+
+                <!-- Store Banner -->
+                <div class="form-group">
+                    <label for="banner">Store Banner <span class="required">*</span></label>
+                    <select id="banner" name="banner" required>
+                        <option value="">Loading banners...</option>
+                    </select>
+                    <div class="help-text">Select the store banner/chain</div>
+                </div>
+
+                <!-- Store Selection -->
+                <div class="form-group">
+                    <label for="outletId">Store <span class="required">*</span></label>
+                    <input 
+                        type="text" 
+                        id="outletId" 
+                        name="outlet_id" 
+                        list="storeList"
+                        required 
+                        disabled
+                        placeholder="Select banner first..."
+                        autocomplete="off">
+                    <datalist id="storeList"></datalist>
+                    <div class="help-text">Start typing to search stores or use dropdown</div>
+                    <div id="lastVisitInfo" class="last-visit-info hidden"></div>
+                </div>
+
+                <!-- Category -->
+                <div class="form-group">
+                    <label for="category">Merchandising Category <span class="required">*</span></label>
+                    <select id="category" name="category" required>
+                        <option value="">-- Select Category --</option>
+                        <option value="Health & Wellness">Health & Wellness</option>
+                        <option value="Beauty & Cosmetics">Beauty & Cosmetics</option>
+                        <option value="Personal Care">Personal Care</option>
+                        <option value="Baby & Maternity">Baby & Maternity</option>
+                        <option value="Vitamins & Supplements">Vitamins & Supplements</option>
+                        <option value="Sports Nutrition">Sports Nutrition</option>
+                        <option value="OTC Medicines">OTC Medicines</option>
+                        <option value="Household">Household</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <!-- Segment -->
+                <div class="form-group">
+                    <label for="segment">Segment (Sub-category) <span class="required">*</span></label>
+                    <input type="text" id="segment" name="segment" required placeholder="e.g., Shampoo, Face Cream">
+                    <div class="help-text">Enter the specific sub-category</div>
+                </div>
+
+                <!-- Rating Key -->
+                <div class="rating-key">
+                    <strong>Rating Scale:</strong> 1⭐ = Very Poor | 2⭐ = Poor | 3⭐ = Average | 4⭐ = Good | 5⭐ = Excellent
+                </div>
+
+                <!-- Ratings Section -->
+                <div class="form-group">
+                    <label>Forward Share <span class="required">*</span></label>
+                    <div class="help-text">Product availability and facing space</div>
+                    <div class="rating-group">
+                        <input type="radio" id="fs1" name="forward_share" value="1" class="rating-option" required>
+                        <label for="fs1" class="rating-label">1⭐</label>
+                        <input type="radio" id="fs2" name="forward_share" value="2" class="rating-option">
+                        <label for="fs2" class="rating-label">2⭐</label>
+                        <input type="radio" id="fs3" name="forward_share" value="3" class="rating-option">
+                        <label for="fs3" class="rating-label">3⭐</label>
+                        <input type="radio" id="fs4" name="forward_share" value="4" class="rating-option">
+                        <label for="fs4" class="rating-label">4⭐</label>
+                        <input type="radio" id="fs5" name="forward_share" value="5" class="rating-option">
+                        <label for="fs5" class="rating-label">5⭐</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Stock Pressure <span class="required">*</span></label>
+                    <div class="help-text">Stock levels and out-of-stock items</div>
+                    <div class="rating-group">
+                        <input type="radio" id="sp1" name="stock_pressure" value="1" class="rating-option" required>
+                        <label for="sp1" class="rating-label">1⭐</label>
+                        <input type="radio" id="sp2" name="stock_pressure" value="2" class="rating-option">
+                        <label for="sp2" class="rating-label">2⭐</label>
+                        <input type="radio" id="sp3" name="stock_pressure" value="3" class="rating-option">
+                        <label for="sp3" class="rating-label">3⭐</label>
+                        <input type="radio" id="sp4" name="stock_pressure" value="4" class="rating-option">
+                        <label for="sp4" class="rating-label">4⭐</label>
+                        <input type="radio" id="sp5" name="stock_pressure" value="5" class="rating-option">
+                        <label for="sp5" class="rating-label">5⭐</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Category Flow <span class="required">*</span></label>
+                    <div class="help-text">Planogram compliance and shelf organization</div>
+                    <div class="rating-group">
+                        <input type="radio" id="cf1" name="category_flow" value="1" class="rating-option" required>
+                        <label for="cf1" class="rating-label">1⭐</label>
+                        <input type="radio" id="cf2" name="category_flow" value="2" class="rating-option">
+                        <label for="cf2" class="rating-label">2⭐</label>
+                        <input type="radio" id="cf3" name="category_flow" value="3" class="rating-option">
+                        <label for="cf3" class="rating-label">3⭐</label>
+                        <input type="radio" id="cf4" name="category_flow" value="4" class="rating-option">
+                        <label for="cf4" class="rating-label">4⭐</label>
+                        <input type="radio" id="cf5" name="category_flow" value="5" class="rating-option">
+                        <label for="cf5" class="rating-label">5⭐</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Pricing Compliance <span class="required">*</span></label>
+                    <div class="help-text">Correct pricing and promotional compliance</div>
+                    <div class="rating-group">
+                        <input type="radio" id="pc1" name="pricing_compliance" value="1" class="rating-option" required>
+                        <label for="pc1" class="rating-label">1⭐</label>
+                        <input type="radio" id="pc2" name="pricing_compliance" value="2" class="rating-option">
+                        <label for="pc2" class="rating-label">2⭐</label>
+                        <input type="radio" id="pc3" name="pricing_compliance" value="3" class="rating-option">
+                        <label for="pc3" class="rating-label">3⭐</label>
+                        <input type="radio" id="pc4" name="pricing_compliance" value="4" class="rating-option">
+                        <label for="pc4" class="rating-label">4⭐</label>
+                        <input type="radio" id="pc5" name="pricing_compliance" value="5" class="rating-option">
+                        <label for="pc5" class="rating-label">5⭐</label>
+                    </div>
+                </div>
+
+                <!-- Promo Compliant -->
+                <div class="form-group">
+                    <label>Promo Ticketing & Display Compliant</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="promoCompliant" name="promo_compliant">
+                        <label for="promoCompliant" style="margin-bottom: 0;">All promotional materials correctly displayed</label>
+                    </div>
+                </div>
+
+                <!-- Competitor Activity -->
+                <div class="form-group">
+                    <label for="competitorActivity">Competitor Activity</label>
+                    <textarea id="competitorActivity" name="competitor_activity" placeholder="Note any competitor promotions or activities observed"></textarea>
+                </div>
+
+                <!-- Overall Rating -->
+                <div class="form-group">
+                    <label>Overall Rating <span class="required">*</span></label>
+                    <div class="help-text">Overall store execution quality</div>
+                    <div class="rating-group">
+                        <input type="radio" id="or1" name="overall_rating" value="1" class="rating-option" required>
+                        <label for="or1" class="rating-label">1⭐</label>
+                        <input type="radio" id="or2" name="overall_rating" value="2" class="rating-option">
+                        <label for="or2" class="rating-label">2⭐</label>
+                        <input type="radio" id="or3" name="overall_rating" value="3" class="rating-option">
+                        <label for="or3" class="rating-label">3⭐</label>
+                        <input type="radio" id="or4" name="overall_rating" value="4" class="rating-option">
+                        <label for="or4" class="rating-label">4⭐</label>
+                        <input type="radio" id="or5" name="overall_rating" value="5" class="rating-option">
+                        <label for="or5" class="rating-label">5⭐</label>
+                    </div>
+                </div>
+
+                <!-- General Comment -->
+                <div class="form-group">
+                    <label for="generalComment">General Comment <span class="required">*</span></label>
+                    <textarea id="generalComment" name="general_comment" required placeholder="Additional observations, issues, or recommendations"></textarea>
+                </div>
+
+                <!-- Photo Upload -->
+                <div class="form-group">
+                    <label>Shelf Photo <span class="required">*</span></label>
+                    <div class="photo-upload">
+                        <input type="file" id="shelfPhoto" accept="image/*" capture="environment" required>
+                        <label for="shelfPhoto" class="upload-btn" id="takePictureBtn">📷 Take Shelf Photo</label>
+                        <div class="help-text" style="margin-top: 12px;">Photo will be saved to Google Drive</div>
+                    </div>
+                    <div id="photoPreview" class="photo-preview hidden">
+                        <strong>Photo Preview:</strong>
+                        <img id="previewImage" src="" alt="Preview">
+                        <br><br>
+                        <button type="button" onclick="retakePhoto()" style="padding: 8px 16px; background: #e53e3e; color: white; border: none; border-radius: 4px; cursor: pointer;">🔄 Retake Photo</button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    ✅ Submit Report
+                </button>
+            </form>
+
+            <!-- Success Message -->
+            <div id="successMessage" class="success-message hidden">
+                <h2>✅ Report Submitted!</h2>
+                <p>Your audit has been successfully saved to Google Sheets and your photo has been uploaded to Google Drive.</p>
+                <button onclick="submitAnother()" class="another-btn">
+                    📝 Submit Another Audit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhtPn3AV2PA9DEZRPAuFUbH-sIL2s1UZal81BCIv-tIiU1cSunN9_fFq1l8U39HJI/exec';
+
+        // GPS functionality
+        let userLocation = { lat: null, lng: null };
+
+        function getLocation() {
+            const statusDiv = document.getElementById('gpsStatus');
+            
+            if (!navigator.geolocation) {
+                statusDiv.className = 'gps-status error';
+                statusDiv.innerHTML = '❌ Geolocation not supported by your browser';
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLocation.lat = position.coords.latitude;
+                    userLocation.lng = position.coords.longitude;
+                    
+                    document.getElementById('geoLat').value = userLocation.lat;
+                    document.getElementById('geoLng').value = userLocation.lng;
+                    
+                    statusDiv.className = 'gps-status success';
+                    statusDiv.innerHTML = `✅ Location captured: ${userLocation.lat.toFixed(6)}, ${userLocation.lng.toFixed(6)}`;
+                },
+                (error) => {
+                    statusDiv.className = 'gps-status error';
+                    statusDiv.innerHTML = '❌ Location access denied. Please enable location permissions.';
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        // Load banners on page load
+        async function loadBanners() {
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?type=banners`);
+                const banners = await response.json();
+                
+                const bannerSelect = document.getElementById('banner');
+                bannerSelect.innerHTML = '<option value="">-- Select Banner --</option>';
+                
+                banners.forEach(banner => {
+                    const option = document.createElement('option');
+                    option.value = banner;
+                    option.textContent = banner;
+                    bannerSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading banners:', error);
+                document.getElementById('banner').innerHTML = '<option value="">Error loading banners</option>';
+            }
+        }
+
+        // Load stores when banner is selected
+        document.getElementById('banner').addEventListener('change', async function() {
+            const banner = this.value;
+            const outletInput = document.getElementById('outletId');
+            const storeList = document.getElementById('storeList');
+            
+            // Hide last visit info when banner changes
+            document.getElementById('lastVisitInfo').classList.add('hidden');
+            
+            if (!banner) {
+                outletInput.placeholder = 'Select banner first...';
+                outletInput.disabled = true;
+                outletInput.value = '';
+                storeList.innerHTML = '';
+                return;
+            }
+            
+            outletInput.placeholder = 'Loading stores...';
+            outletInput.disabled = true;
+            outletInput.value = '';
+            
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?type=outlets&banner=${encodeURIComponent(banner)}`);
+                const outlets = await response.json();
+                
+                // Store outlets data globally for validation
+                window.availableStores = outlets;
+                
+                // Populate datalist
+                storeList.innerHTML = '';
+                outlets.forEach(outlet => {
+                    const option = document.createElement('option');
+                    option.value = `${outlet.outlet_id} - ${outlet.outlet_name}`;
+                    option.setAttribute('data-outlet-id', outlet.outlet_id);
+                    storeList.appendChild(option);
+                });
+                
+                outletInput.placeholder = 'Start typing to search stores...';
+                outletInput.disabled = false;
+            } catch (error) {
+                console.error('Error loading stores:', error);
+                outletInput.placeholder = 'Error loading stores';
+            }
+        });
+
+        // Extract outlet ID from selected value and check last visit
+        document.getElementById('outletId').addEventListener('input', function() {
+            const selectedValue = this.value;
+            const lastVisitDiv = document.getElementById('lastVisitInfo');
+            
+            // Extract outlet ID from "DC000024 - Fourways" format
+            const match = selectedValue.match(/^([A-Z0-9]+)\s*-/);
+            if (match) {
+                const outletId = match[1];
+                const repId = document.getElementById('repId').value.trim();
+                
+                if (outletId && repId) {
+                    checkLastVisit(repId, outletId);
+                } else {
+                    lastVisitDiv.classList.add('hidden');
+                }
+            } else {
+                lastVisitDiv.classList.add('hidden');
+            }
+        });
+
+        // Helper function to check last visit
+        async function checkLastVisit(repId, outletId) {
+            const lastVisitDiv = document.getElementById('lastVisitInfo');
+            
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?type=lastvisit&rep_id=${encodeURIComponent(repId)}&outlet_id=${encodeURIComponent(outletId)}`);
+                const result = await response.json();
+                
+                if (result.found) {
+                    if (result.daysAgo === 0) {
+                        lastVisitDiv.innerHTML = '🕐 Last audited: Today';
+                        lastVisitDiv.className = 'last-visit-info recent';
+                    } else if (result.daysAgo === 1) {
+                        lastVisitDiv.innerHTML = '🕐 Last audited: Yesterday';
+                        lastVisitDiv.className = 'last-visit-info recent';
+                    } else if (result.daysAgo <= 7) {
+                        lastVisitDiv.innerHTML = `🕐 Last audited: ${result.daysAgo} days ago`;
+                        lastVisitDiv.className = 'last-visit-info recent';
+                    } else {
+                        lastVisitDiv.innerHTML = `⚠️ Last audited: ${result.daysAgo} days ago (${result.date})`;
+                        lastVisitDiv.className = 'last-visit-info';
+                    }
+                    lastVisitDiv.classList.remove('hidden');
+                } else {
+                    lastVisitDiv.innerHTML = '✨ First visit to this store!';
+                    lastVisitDiv.className = 'last-visit-info never';
+                    lastVisitDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error checking last visit:', error);
+                lastVisitDiv.classList.add('hidden');
+            }
+        }
+
+        // Photo handling with compression
+        let capturedPhoto = null;
+
+        // Compress image to max 800px width
+        async function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        // Calculate new dimensions
+                        let width = img.width;
+                        let height = img.height;
+                        const maxWidth = 800;
+                        
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+                        
+                        // Create canvas and resize
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Convert to blob
+                        canvas.toBlob((blob) => {
+                            resolve(new File([blob], file.name, {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            }));
+                        }, 'image/jpeg', 0.85); // 85% quality
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        document.getElementById('shelfPhoto').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Show compressing message
+                const statusDiv = document.getElementById('gpsStatus');
+                const originalStatus = statusDiv.innerHTML;
+                statusDiv.className = 'gps-status loading';
+                statusDiv.innerHTML = '🔄 Compressing image...';
+                
+                try {
+                    // Compress the image
+                    capturedPhoto = await compressImage(file);
+                    
+                    // Show preview
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        document.getElementById('previewImage').src = event.target.result;
+                        document.getElementById('photoPreview').classList.remove('hidden');
+                        document.getElementById('takePictureBtn').textContent = '✅ Photo Captured';
+                        document.getElementById('takePictureBtn').style.background = '#10b981';
+                        
+                        // Calculate compression ratio
+                        const compressionRatio = ((1 - capturedPhoto.size / file.size) * 100).toFixed(0);
+                        statusDiv.innerHTML = originalStatus + ` | 📸 Image compressed ${compressionRatio}%`;
+                    };
+                    reader.readAsDataURL(capturedPhoto);
+                } catch (error) {
+                    console.error('Compression error:', error);
+                    capturedPhoto = file; // Use original if compression fails
+                    statusDiv.innerHTML = originalStatus;
+                }
+            }
+        });
+
+        function retakePhoto() {
+            capturedPhoto = null;
+            document.getElementById('shelfPhoto').value = '';
+            document.getElementById('photoPreview').classList.add('hidden');
+            document.getElementById('takePictureBtn').textContent = '📷 Take Shelf Photo';
+            document.getElementById('takePictureBtn').style.background = '';
+        }
+
+        // Form submission via hidden iframe (bypasses CORS)
+        document.getElementById('shelfForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            
+            // Save last selections
+            saveLastSelections();
+            
+            // Validate GPS
+            if (!userLocation.lat || !userLocation.lng) {
+                alert('⚠️ Location not available. Please allow location access and try again.');
+                getLocation();
+                return;
+            }
+
+            // Validate photo
+            if (!capturedPhoto) {
+                alert('⚠️ Please take a shelf photo before submitting.');
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Uploading photo...';
+            
+            try {
+                // Convert photo to base64
+                const photoBase64 = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(capturedPhoto);
+                });
+
+                submitBtn.textContent = '⏳ Submitting data...';
+                
+                // Collect form data
+                const outletValue = document.getElementById('outletId').value;
+                const outletMatch = outletValue.match(/^([A-Z0-9]+)\s*-/);
+                const outletId = outletMatch ? outletMatch[1] : outletValue;
+                
+                const formData = {
+                    rep_id: document.getElementById('repId').value.trim(),
+                    banner: document.getElementById('banner').value,
+                    outlet_id: outletId,
+                    category: document.getElementById('category').value,
+                    segment: document.getElementById('segment').value.trim(),
+                    forward_share: parseInt(document.querySelector('input[name="forward_share"]:checked').value),
+                    stock_pressure: parseInt(document.querySelector('input[name="stock_pressure"]:checked').value),
+                    category_flow: parseInt(document.querySelector('input[name="category_flow"]:checked').value),
+                    pricing_compliance: parseInt(document.querySelector('input[name="pricing_compliance"]:checked').value),
+                    promo_compliant: document.getElementById('promoCompliant').checked,
+                    competitor_activity: document.getElementById('competitorActivity').value.trim(),
+                    overall_rating: parseInt(document.querySelector('input[name="overall_rating"]:checked').value),
+                    general_comment: document.getElementById('generalComment').value.trim(),
+                    geo_lat: parseFloat(document.getElementById('geoLat').value),
+                    geo_lng: parseFloat(document.getElementById('geoLng').value),
+                    photo_filename: capturedPhoto.name,
+                    photo_base64: photoBase64,
+                    photo_type: capturedPhoto.type
+                };
+                
+                console.log('📤 Sending data via iframe form...');
+                
+                // Create hidden form
+                const hiddenForm = document.createElement('form');
+                hiddenForm.method = 'POST';
+                hiddenForm.action = GOOGLE_SCRIPT_URL;
+                hiddenForm.target = 'hidden_iframe';
+                hiddenForm.style.display = 'none';
+                
+                // Add data as hidden input
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'data';
+                input.value = JSON.stringify(formData);
+                hiddenForm.appendChild(input);
+                
+                // Create hidden iframe
+                const iframe = document.createElement('iframe');
+                iframe.name = 'hidden_iframe';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                // Submit form
+                document.body.appendChild(hiddenForm);
+                hiddenForm.submit();
+                
+                // Wait a moment then show success
+                setTimeout(() => {
+                    document.getElementById('shelfForm').classList.add('hidden');
+                    document.getElementById('successMessage').classList.remove('hidden');
+                    document.body.removeChild(hiddenForm);
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Submission error:', error);
+                alert('❌ Failed to submit report. Please check your connection and try again.\n\nError: ' + error.message);
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        // Submit another audit
+        function submitAnother() {
+            // Reset form
+            document.getElementById('shelfForm').reset();
+            capturedPhoto = null;
+            document.getElementById('photoPreview').classList.add('hidden');
+            document.getElementById('takePictureBtn').textContent = '📷 Take Shelf Photo';
+            document.getElementById('takePictureBtn').style.background = '';
+            
+            // Show form, hide success
+            document.getElementById('shelfForm').classList.remove('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+            
+            // Reload GPS
+            getLocation();
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            getLocation();
+            loadBanners();
+            restoreLastSelections();
+        });
+
+        // Restore last selections from localStorage
+        function restoreLastSelections() {
+            const lastRepId = localStorage.getItem('fieldview_last_rep_id');
+            const lastBanner = localStorage.getItem('fieldview_last_banner');
+            const lastOutlet = localStorage.getItem('fieldview_last_outlet');
+            
+            if (lastRepId) {
+                document.getElementById('repId').value = lastRepId;
+            }
+            
+            // Wait for banners to load, then set last banner
+            if (lastBanner) {
+                const checkBanners = setInterval(() => {
+                    const bannerSelect = document.getElementById('banner');
+                    if (bannerSelect.options.length > 1) {
+                        bannerSelect.value = lastBanner;
+                        // Trigger change to load stores
+                        bannerSelect.dispatchEvent(new Event('change'));
+                        clearInterval(checkBanners);
+                        
+                        // Wait for stores to load, then set last outlet
+                        if (lastOutlet) {
+                            setTimeout(() => {
+                                const outletInput = document.getElementById('outletId');
+                                if (!outletInput.disabled) {
+                                    outletInput.value = lastOutlet;
+                                    // Trigger input event to check last visit
+                                    outletInput.dispatchEvent(new Event('input'));
+                                }
+                            }, 500);
+                        }
+                    }
+                }, 100);
+            }
+        }
+
+        // Save selections to localStorage
+        function saveLastSelections() {
+            const repId = document.getElementById('repId').value;
+            const banner = document.getElementById('banner').value;
+            const outletValue = document.getElementById('outletId').value;
+            
+            if (repId) localStorage.setItem('fieldview_last_rep_id', repId);
+            if (banner) localStorage.setItem('fieldview_last_banner', banner);
+            if (outletValue) localStorage.setItem('fieldview_last_outlet', outletValue);
+        }
+    </script>
+</body>
+</html>

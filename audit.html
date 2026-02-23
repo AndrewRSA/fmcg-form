@@ -787,7 +787,7 @@
             document.getElementById('takePictureBtn').style.background = '';
         }
 
-        // Form submission via hidden iframe (bypasses CORS)
+        // Form submission via traditional POST
         document.getElementById('shelfForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -850,37 +850,27 @@
                     photo_type: capturedPhoto.type
                 };
                 
-                console.log('📤 Sending data via iframe form...');
+                console.log('📤 Submitting via URL-encoded POST...');
                 
-                // Create hidden form
-                const hiddenForm = document.createElement('form');
-                hiddenForm.method = 'POST';
-                hiddenForm.action = GOOGLE_SCRIPT_URL;
-                hiddenForm.target = 'hidden_iframe';
-                hiddenForm.style.display = 'none';
+                // Create URL-encoded form data
+                const urlParams = new URLSearchParams();
+                urlParams.append('data', JSON.stringify(formData));
                 
-                // Add data as hidden input
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'data';
-                input.value = JSON.stringify(formData);
-                hiddenForm.appendChild(input);
+                // Submit using fetch with form encoding
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: urlParams.toString()
+                });
                 
-                // Create hidden iframe
-                const iframe = document.createElement('iframe');
-                iframe.name = 'hidden_iframe';
-                iframe.style.display = 'none';
-                document.body.appendChild(iframe);
+                console.log('📥 Response received');
                 
-                // Submit form
-                document.body.appendChild(hiddenForm);
-                hiddenForm.submit();
-                
-                // Wait a moment then show success
+                // Show success (we can't read response with CORS, so assume success after 2 seconds)
                 setTimeout(() => {
                     document.getElementById('shelfForm').classList.add('hidden');
                     document.getElementById('successMessage').classList.remove('hidden');
-                    document.body.removeChild(hiddenForm);
                 }, 2000);
                 
             } catch (error) {
